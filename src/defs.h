@@ -32,6 +32,7 @@ struct uttp_server_s {
     struct sockaddr_storage address;
     uv_signal_t sigint_h;
     uv_signal_t sigterm_h;
+    uv_barrier_t start_barrier;
     uttp_worker_t* workers;
 };
 

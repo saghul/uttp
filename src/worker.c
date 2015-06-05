@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "defs.h"
 #include "worker.h"
 
 
@@ -13,6 +14,10 @@ static void uttp__worker_stop(uv_async_t* handle) {
 
 static void uttp__worker_run(void* arg) {
     uttp_worker_t* worker = arg;
+    uttp_server_t* server = worker->server;
+
+    /* synchronize the start */
+    uv_barrier_wait(&server->start_barrier);
 
     log_info("[%s] started", worker->name);
     uv_run(&worker->loop, UV_RUN_DEFAULT);

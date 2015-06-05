@@ -68,7 +68,7 @@ int uttp_server_run(uttp_server_t* server, uttp_server_config_t* config, uv_loop
     r = uv_signal_start(&server->sigterm_h, uttp__server_quit, SIGTERM);
     ASSERT(r == 0);
 
-    /* start workers */
+    /* compute number or workers */
     if (config->nworkers == 0) {
         uv_cpu_info_t* infos;
         int count;
@@ -83,8 +83,13 @@ int uttp_server_run(uttp_server_t* server, uttp_server_config_t* config, uv_loop
         }
     }
     ASSERT(config->nworkers > 0);
-    log_info("Launching %d workers", config->nworkers);
 
+    /* initialize start barrier */
+    r = uv_barrier_init(&server->start_barrier, config->nworkers + 1);
+    ASSERT(r == 0);
+
+    /* start workers */
+    log_info("Launching %d workers", config->nworkers);
     server->workers = malloc(sizeof(uttp_worker_t) * config->nworkers);
     ASSERT(server->workers != NULL);
     for (i = 0; i < config->nworkers; i++) {
@@ -93,6 +98,9 @@ int uttp_server_run(uttp_server_t* server, uttp_server_config_t* config, uv_loop
         r = uttp_worker_start(worker, &worker_config);
         ASSERT(r == 0);
     }
+
+    /* wait for all workers to start */
+    uv_barrier_wait(&server->start_barrier);
 
     uv_run(server->loop, UV_RUN_DEFAULT);
 
