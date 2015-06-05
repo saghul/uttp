@@ -42,6 +42,7 @@ struct uttp_worker_s {
     uv_async_t stop_async;
     uv_thread_t thread;
     uttp_server_t* server;
+    uv_tcp_t tcp_listener;
 };
 
 

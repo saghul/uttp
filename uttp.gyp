@@ -15,6 +15,8 @@
         'src/server.h',
         'src/worker.c',
         'src/worker.h',
+        'src/util.c',
+        'src/util.h',
       ]
     }
   ]
