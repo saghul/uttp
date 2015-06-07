@@ -7,6 +7,8 @@
 #include <stdio.h>
 
 #include "uv.h"
+#include "http_parser.h"
+
 #include "queue.h"
 
 
@@ -56,6 +58,8 @@ typedef struct {
     uv_tcp_t tcp_handle;
     QUEUE queue;
     uttp_worker_t* worker;
+    http_parser parser;
+    http_parser_settings parser_settings;
 } uttp_conn_t;
 
 #endif
