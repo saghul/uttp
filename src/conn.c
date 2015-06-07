@@ -42,9 +42,6 @@ static void uttp__conn_read_cb(uv_stream_t* stream, ssize_t nread, const uv_buf_
     uttp_conn_t* conn = container_of(stream, uttp_conn_t, tcp_handle);
 
     if (buf->base != NULL) {
-        if (nread >= 0) {
-            log_debug("Received data: %.*s", (int) nread, buf->base);
-        }
         free(buf->base);
     }
 
