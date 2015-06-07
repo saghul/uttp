@@ -58,6 +58,7 @@ static void parse_options(uttp_server_config_t *config, int argc, char** argv) {
                         "  -h                         Show this help message.\n"
                         "",
                         argv[0]);
+                exit(1);
         }
     }
 
