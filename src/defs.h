@@ -4,8 +4,10 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "uv.h"
+#include "queue.h"
 
 
 #define container_of(ptr, type, member) \
@@ -43,7 +45,14 @@ struct uttp_worker_s {
     uv_thread_t thread;
     uttp_server_t* server;
     uv_tcp_t tcp_listener;
+    QUEUE conn_queue;
 };
 
+
+typedef struct {
+    uv_tcp_t tcp_handle;
+    QUEUE queue;
+    uttp_worker_t* worker;
+} uttp_conn_t;
 
 #endif

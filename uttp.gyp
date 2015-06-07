@@ -17,6 +17,9 @@
         'src/worker.h',
         'src/util.c',
         'src/util.h',
+        'src/queue.h',
+        'src/conn.c',
+        'src/conn.h',
       ]
     }
   ]

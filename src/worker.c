@@ -6,6 +6,7 @@
 #include "defs.h"
 #include "util.h"
 #include "worker.h"
+#include "conn.h"
 
 
 static void uttp__worker_stop(uv_async_t* handle) {
@@ -14,25 +15,50 @@ static void uttp__worker_stop(uv_async_t* handle) {
 
 
 static void uttp__worker_handle_connection(uv_stream_t* server, int status) {
+    int r;
+    uttp_conn_t* conn;
     uttp_worker_t* worker = container_of(server, uttp_worker_t, tcp_listener);
     if (status != 0) {
-        log_warn("[%s] Error accepting incoming connection: %s - %s", worker->name, uv_err_name(status), uv_strerror(status));
+        log_warn("[%s] Error processing incoming connection: %s - %s", worker->name, uv_err_name(status), uv_strerror(status));
         return;
     }
 
     log_debug("[%s] Processng incoming connection...", worker->name);
-    /* TODO */
+
+    conn = malloc(sizeof(*conn));
+    ASSERT(conn != NULL);
+
+    r = uttp_conn_init(worker, conn);
+    ASSERT(r == 0);
+
+    r = uv_accept(server, (uv_stream_t*) &conn->tcp_handle);
+    if (r != 0) {
+        log_warn("[%s] Error accepting incoming connection: %s - %s", worker->name, uv_err_name(r), uv_strerror(r));
+        uttp_conn_destroy(conn);
+        return;
+    }
+    uttp_conn_run(conn);
 }
 
 
 static void uttp__worker_close(uttp_worker_t* worker) {
     int r;
+    QUEUE* q;
+    uttp_conn_t* conn;
 
     uv_close((uv_handle_t*) &worker->tcp_listener, NULL);
     uv_close((uv_handle_t*) &worker->stop_async, NULL);
 
+    while (!QUEUE_EMPTY(&worker->conn_queue)) {
+        q = QUEUE_HEAD(&worker->conn_queue);
+        conn = QUEUE_DATA(q, uttp_conn_t, queue);
+        uttp_conn_destroy(conn);
+    }
+    ASSERT(QUEUE_EMPTY(&worker->conn_queue));
+
     r = uv_run(&worker->loop, UV_RUN_DEFAULT);
     ASSERT(r == 0);
+
     r = uv_loop_close(&worker->loop);
     ASSERT(r == 0);
 }
@@ -67,6 +93,7 @@ int uttp_worker_start(uttp_worker_t* worker, uttp_worker_config_t* config) {
 
     snprintf(worker->name, sizeof(worker->name), "Worker #%d", config->id);
     worker->server = server;
+    QUEUE_INIT(&worker->conn_queue);
 
     r = uv_loop_init(&worker->loop);
     ASSERT(r == 0);
