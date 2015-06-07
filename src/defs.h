@@ -46,6 +46,9 @@ struct uttp_worker_s {
     uttp_server_t* server;
     uv_tcp_t tcp_listener;
     QUEUE conn_queue;
+    struct {
+        unsigned int connections;
+    } statistics;
 };
 
 

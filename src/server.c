@@ -116,6 +116,13 @@ int uttp_server_run(uttp_server_t* server, uttp_server_config_t* config, uv_loop
     }
 
     log_info("Server stopped");
+
+    log_debug("UTTP server statistics:");
+    for (i = 0; i < config->nworkers; i++) {
+        uttp_worker_t* worker = server->workers + i;
+        log_debug("[%s] handled %u connections", worker->name, worker->statistics.connections);
+    }
+
     return 0;
 }
 

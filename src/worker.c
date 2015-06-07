@@ -38,6 +38,7 @@ static void uttp__worker_handle_connection(uv_stream_t* server, int status) {
         return;
     }
     uttp_conn_run(conn);
+    worker->statistics.connections++;
 }
 
 
