@@ -7,6 +7,10 @@
 #include "server.h"
 
 
+#define UTTP_DEFAULT_ADDRESS "0.0.0.0"
+#define UTTP_DEFAULT_PORT    8088
+#define UTTP_DEFAULT_WORKERS 0
+
 static void parse_options(uttp_server_config_t *config, int argc, char** argv) {
     for (;;) {
         static struct option uttp_options[] = {
@@ -63,7 +67,12 @@ int main(int argc, char** argv) {
     int r;
     uttp_server_t server;
     uttp_server_config_t config;
+
     memset(&config, 0, sizeof(uttp_server_config_t));
+    config.interface = UTTP_DEFAULT_ADDRESS;
+    config.port = UTTP_DEFAULT_PORT;
+    config.nworkers = UTTP_DEFAULT_WORKERS;
+
     parse_options(&config, argc, argv);
 
     r = uttp_server_run(&server, &config, NULL);
