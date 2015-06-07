@@ -90,7 +90,7 @@ static void uttp__conn_read_cb(uv_stream_t* stream, ssize_t nread, const uv_buf_
         if (nread == UV_EOF) {
             log_debug("[%s][conn %p] closed", conn->worker->name, conn);
         } else {
-            log_debug("[%s][conn %p] read error: %s - %s", conn->worker->name, conn, uv_err_name(nread), uv_strerror(nread));
+            log_warn("[%s][conn %p] read error: %s - %s", conn->worker->name, conn, uv_err_name(nread), uv_strerror(nread));
         }
         uttp_conn_destroy(conn);
         goto end;
@@ -101,10 +101,10 @@ static void uttp__conn_read_cb(uv_stream_t* stream, ssize_t nread, const uv_buf_
         /* TODO */
         uttp_conn_destroy(conn);
     } else if (conn->parser.http_errno != HPE_OK) {
-        log_debug("[%s][conn %p] parsing error: %s - %s", conn->worker->name,
-                                                          conn,
-                                                          http_errno_name(conn->parser.http_errno),
-                                                          http_errno_description(conn->parser.http_errno));
+        log_warn("[%s][conn %p] parsing error: %s - %s", conn->worker->name,
+                                                         conn,
+                                                         http_errno_name(conn->parser.http_errno),
+                                                         http_errno_description(conn->parser.http_errno));
         log_debug("%.*s", (int) nread, buf->base);
         uttp_conn_destroy(conn);
     } else {
