@@ -53,7 +53,8 @@ static void parse_options(uttp_server_config_t *config, int argc, char** argv) {
                         "Options:\n"
                         "\n"
                         "  -i, --interface <address>  Bind to this address. Default: \"0.0.0.0\"\n"
-                        "  -p, --port <port>          Bind to this port number. Default: 0\n"
+                        "  -p, --port <port>          Bind to this port number. Default: 8088\n"
+                        "  -w, --workers <workers>    Number of workers to use. Default: number of CPUs\n"
                         "  -h                         Show this help message.\n"
                         "",
                         argv[0]);
