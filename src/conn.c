@@ -71,7 +71,9 @@ void uttp_conn_destroy(uttp_conn_t* conn) {
     if (!QUEUE_EMPTY(&conn->queue)) {
         QUEUE_REMOVE(&conn->queue);
     }
-    uv_close((uv_handle_t*) &conn->tcp_handle, uttp__conn_tcp_close);
+    if (!uv_is_closing((uv_handle_t*) &conn->tcp_handle)) {
+        uv_close((uv_handle_t*) &conn->tcp_handle, uttp__conn_tcp_close);
+    }
 }
 
 
