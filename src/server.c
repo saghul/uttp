@@ -127,34 +127,22 @@ int uttp_server_run(uttp_server_t* server, uttp_server_config_t* config, uv_loop
 }
 
 
-static void uttp__walk_cb(uv_handle_t* handle, void* arg) {
-    if (!uv_is_closing(handle)) {
-        uv_close(handle, NULL);
-    }
-}
-
-
-static void uttp__loop_close(uv_loop_t* loop) {
-    int r;
-    uv_walk(loop, uttp__walk_cb, NULL);
-    r = uv_run(loop, UV_RUN_DEFAULT);
-    ASSERT(r == 0);
-    r = uv_loop_close(loop);
-    ASSERT(r == 0);
-}
-
-
 void uttp_server_close(uttp_server_t* server) {
     if (server->loop == NULL) {
         return;
     }
+
+    uv_close((uv_handle_t*) &server->sigint_h, NULL);
+    uv_close((uv_handle_t*) &server->sigterm_h, NULL);
+    uv_run(server->loop, UV_RUN_NOWAIT);
     if (server->own_loop) {
-        uttp__loop_close(server->loop);
+        int r;
+        r = uv_loop_close(server->loop);
+        ASSERT(r == 0);
         free(server->loop);
-    } else {
-        /* TODO: just close our handles? */
     }
     server->loop = NULL;
+
     free(server->workers);
     server->workers = NULL;
 
