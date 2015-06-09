@@ -24,8 +24,17 @@ static void uttp__conn_write_cb(uv_write_t* req, int status) {
 
     if (status < 0) {
         log_warn("[%s][conn %p] write error: %s - %s", conn->worker->name, conn, uv_err_name(status), uv_strerror(status));
+        uttp_conn_destroy(conn);
+        return;
     }
-    uttp_conn_destroy(conn);
+
+    /* should we keep this connection open? */
+    if (http_should_keep_alive(&conn->parser)) {
+        log_debug("[%s][conn %p] keeping connection alive", conn->worker->name, conn);
+        http_parser_init(&conn->parser, HTTP_REQUEST);
+    } else {
+        uttp_conn_destroy(conn);
+    }
 }
 
 
