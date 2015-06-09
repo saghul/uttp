@@ -19,6 +19,9 @@
 
 static void uttp__conn_write_cb(uv_write_t* req, int status) {
     uttp_conn_t* conn = req->data;
+
+    free(req);
+
     if (status < 0) {
         log_warn("[%s][conn %p] write error: %s - %s", conn->worker->name, conn, uv_err_name(status), uv_strerror(status));
     }
