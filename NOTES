@@ -1,0 +1,17 @@
+
+- https://code.google.com/p/memslab/
+
+- connection balancing strategies
+    - multi-threaded
+        - SO_REUSEPORT (Linux only)
+        - IPC (Unix only)
+        - single accept()-or thread + manual dispatching
+    - multi-process
+        - SO_REUSEPORT (Linux only)
+        - IPC
+        - master creates acceptor socket, then forks
+
+- benchmarking
+    - https://iammat.wordpress.com/2014/07/17/ab-on-osx-and-wrk/
+    - https://www.mnot.net/blog/2011/05/18/http_benchmark_rules
+
