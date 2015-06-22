@@ -4,7 +4,6 @@
 
 #include "log.h"
 #include "defs.h"
-#include "util.h"
 #include "worker.h"
 #include "conn.h"
 
@@ -87,6 +86,7 @@ static void uttp__worker_run(void* arg) {
 
 int uttp_worker_start(uttp_worker_t* worker, uttp_worker_config_t* config) {
     int r;
+    int on;
     int fd;
     uttp_server_t* server = config->server;
 
@@ -102,13 +102,15 @@ int uttp_worker_start(uttp_worker_t* worker, uttp_worker_config_t* config) {
     r = uv_async_init(&worker->loop, &worker->stop_async, uttp__worker_stop);
     ASSERT(r == 0);
 
-    fd = uttp_tcp_socket_create(server->address.ss_family);
-    ASSERT(fd != -1);
-
-    r = uv_tcp_init(&worker->loop, &worker->tcp_listener);
+    r = uv_tcp_init_ex(&worker->loop, &worker->tcp_listener, server->address.ss_family);
     ASSERT(r == 0);
 
-    r = uv_tcp_open(&worker->tcp_listener, fd);
+    r = uv_fileno((uv_handle_t*) &worker->tcp_listener, &fd);
+    ASSERT(r == 0);
+    ASSERT(fd != -1);
+
+    on = 1;
+    r = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
     ASSERT(r == 0);
 
     r = uv_tcp_bind(&worker->tcp_listener, (const struct sockaddr*) &server->address, 0);
